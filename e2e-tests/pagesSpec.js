@@ -20,6 +20,7 @@ describe("Test Pages", function() {
 
   it('should have no listings on the index page and show a special message', function() {
     browser.get(ROOT + "/");
+
     expect(element.all(by.css('.url-listing')).count()).toBe(0);
 
     expect(element.all(by.css('.empty-url-listing')).count()).toBe(1);
@@ -42,7 +43,7 @@ describe("Test Pages", function() {
     expect(element.all(by.css('.empty-url-listing')).count()).toBe(0);
 
   });
-          
+
 
   it('should search based off of the URL', function() {
     createUrlEntry("url one", "http://url-one.com");
@@ -50,6 +51,7 @@ describe("Test Pages", function() {
     createUrlEntry("url three", "http://url-three.com");
 
     browser.get(ROOT + "/");
+
     expect(element.all(by.css('.url-listing')).count()).toBe(3);
 
     browser.get(ROOT + "/?q=one");
@@ -64,6 +66,8 @@ describe("Test Pages", function() {
     var originalTitle = "url one";
 
     var originalUrl = "http://url-one.com";
+
+    browser.get(ROOT + "/");
 
     createUrlEntry(originalTitle, originalUrl);
 
@@ -99,13 +103,61 @@ describe("Test Pages", function() {
 
     expect(element.all(by.css('.url-listing')).count()).toBe(1);
 
-    browser.debugger();
+    element(by.css('.btn-danger')).click();
+
+    browser.get(ROOT + "/");
+
+    expect(element.all(by.css('.url-listing')).count()).toBe(0);
+
+  });
+
+  it('should delete a new created url', function() {
+
+    createUrlEntry("url delete", "http://url-delete.com");
+
+    browser.get(ROOT + "/");
+
+    expect(element.all(by.css('.url-listing')).count()).toBe(1);
 
     element(by.css('.btn-danger')).click();
 
     browser.get(ROOT + "/");
 
     expect(element.all(by.css('.url-listing')).count()).toBe(0);
+
+  });
+
+  it('should edit a created url', function() {
+
+    var originalTitle = "url TO BE EDITED";
+
+    var originalUrl = "http://url-to-be-edited.com";
+
+    browser.get(ROOT + "/");
+
+    createUrlEntry(originalTitle, originalUrl);
+
+    browser.get(ROOT + "/");
+
+    expect(element(by.css('.url-listing .listing-title')).getText()).toContain(originalTitle);
+
+    element(by.linkText('Edit')).click();
+
+    expect(browser.getLocationAbsUrl()).toMatch(/#\/edit\/[0-9]{1}/);
+
+    var editedTitle = 'EDITED URL';
+
+    element(by.model('formCtrl.form.title')).clear();
+
+    element(by.model('formCtrl.form.title')).sendKeys(editedTitle);
+
+    element(by.css('input[type=submit]')).click();
+
+    browser.get(ROOT + "/");
+
+    expect(element(by.css('.url-listing .listing-title')).getText()).toContain(editedTitle);
+
+    expect(element(by.css('.url-listing .listing-title')).getText()).not.toContain(originalTitle);
 
   });
 
